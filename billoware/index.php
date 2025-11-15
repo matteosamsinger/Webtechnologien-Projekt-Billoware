@@ -55,7 +55,7 @@
     <!-- Anzeige 2 -->
     <div class="col-md-4">
       <div class="card h-100">
-        <!-- <img src="assets/img/fahrrad.jpg" class="card-img-top" alt="Fahrrad"> -->
+      <img src="assets/img/fahrrad.png" class="card-img-top" alt="Citybike">  
         <div class="card-body d-flex flex-column">
           <h5 class="card-title">Citybike</h5>
           <p class="card-text small text-muted mb-2">
@@ -70,7 +70,7 @@
     <!-- Anzeige 3 -->
     <div class="col-md-4">
       <div class="card h-100">
-        <!-- <img src="assets/img/monitor.jpg" class="card-img-top" alt="Monitor"> -->
+        <img src="assets/img/monitor.png" class="card-img-top" alt="24 Zoll Monitor">
         <div class="card-body d-flex flex-column">
           <h5 class="card-title">24" Monitor</h5>
           <p class="card-text small text-muted mb-2">
