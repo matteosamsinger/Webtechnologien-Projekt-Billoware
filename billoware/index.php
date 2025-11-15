@@ -39,9 +39,9 @@
     <!-- Anzeige 1 -->
     <div class="col-md-4">
       <div class="card h-100">
-        <!-- Wenn du noch keine Bilder hast, lass das img weg oder nimm ein Dummy-Bild -->
-        <!-- <img src="assets/img/schreibtisch.jpg" class="card-img-top" alt="Schreibtisch"> -->
-        <div class="card-body d-flex flex-column">
+        <!-- Wenn du noch kein Bild hast, lass das img erstmal weg oder nimm ein Platzhalterbild -->
+        <!-- <img src="assets/img/example1.jpg" class="card-img-top" alt="Beispielartikel"> -->
+        <div class="card-body">
           <h5 class="card-title">IKEA Schreibtisch</h5>
           <p class="card-text small text-muted mb-2">
             Weiß, 120×60 cm, ideal fürs Home-Office oder Studium. Leichte Gebrauchsspuren.
