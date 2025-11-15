@@ -40,7 +40,7 @@
     <div class="col-md-4">
       <div class="card h-100">
         <!-- Wenn du noch kein Bild hast, lass das img erstmal weg oder nimm ein Platzhalterbild -->
-        <!-- <img src="assets/img/example1.jpg" class="card-img-top" alt="Beispielartikel"> -->
+        <img src="assets/img/ikea_schreibtisch.png" class="card-img-top" alt="IKEA Schreibtisch">
         <div class="card-body">
           <h5 class="card-title">IKEA Schreibtisch</h5>
           <p class="card-text small text-muted mb-2">
