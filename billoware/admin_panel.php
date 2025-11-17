@@ -184,8 +184,7 @@ include __DIR__ . '/partials/header.php';
     </div>
 
     <p class="small text-muted mt-2">
-      Hinweis: Die Sperr-Informationen werden aktuell nur in der Session gespeichert
-      und gehen verloren, wenn die Session abläuft oder der Server neu gestartet wird.
+
     </p>
   </div>
 </div>
