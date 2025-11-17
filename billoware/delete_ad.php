@@ -1,104 +1,76 @@
 <?php
 // delete_ad.php
 
+// Session starten
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-// Nur eingeloggte User/Admins
+// Nur eingeloggte Benutzer dürfen hier her
 if (!isset($_SESSION['user'])) {
     header('Location: login.php');
     exit;
 }
 
-$currentUser = $_SESSION['user'];
-$isAdmin     = ($currentUser['role'] ?? '') === 'admin';
-$userEmail   = $currentUser['email'] ?? '';
+// Wenn Formular schon bestätigt wurde → wirklich löschen
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $id = $_POST['id'] ?? null;
 
-// id kann von GET (erster Aufruf) oder von POST (Bestätigung) kommen
-$id = $_GET['id'] ?? ($_POST['id'] ?? null);
-
-if (!$id || empty($_SESSION['ads']) || !is_array($_SESSION['ads'])) {
-    // Wenn keine gültige id → zurück
-    header('Location: ' . ($isAdmin ? 'admin_panel.php' : 'dashboard.php'));
-    exit;
-}
-
-// passende Anzeige in Session finden
-$adIndex = null;
-foreach ($_SESSION['ads'] as $index => $adCandidate) {
-    if (($adCandidate['id'] ?? null) === $id) {
-        $adIndex = $index;
-        break;
+    if ($id !== null && isset($_SESSION['ads']) && is_array($_SESSION['ads'])) {
+        foreach ($_SESSION['ads'] as $index => $ad) {
+            if (!empty($ad['id']) && $ad['id'] === $id) {
+                unset($_SESSION['ads'][$index]);
+                $_SESSION['ads'] = array_values($_SESSION['ads']); // Indizes neu ordnen
+                break;
+            }
+        }
     }
-}
 
-if ($adIndex === null) {
-    // Keine Anzeige gefunden
-    header('Location: ' . ($isAdmin ? 'admin_panel.php' : 'dashboard.php'));
-    exit;
-}
-
-$ad = $_SESSION['ads'][$adIndex];
-
-// Darf nur löschen, wenn Besitzer oder Admin
-$isOwner = ($ad['owner'] ?? '') === $userEmail;
-if (!$isAdmin && !$isOwner) {
+    // Zurück zum Dashboard
     header('Location: dashboard.php');
     exit;
 }
 
-// Wenn Formular bestätigt wurde → wirklich löschen
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['confirm'] ?? '') === 'yes') {
-    unset($_SESSION['ads'][$adIndex]);
-    $_SESSION['ads'] = array_values($_SESSION['ads']); // Indizes neu ordnen
+// Wenn wir hier sind: Seite wurde per GET aufgerufen → Bestätigungsfenster anzeigen
+$id = $_GET['id'] ?? null;
+$adTitle = '';
 
-    header('Location: ' . ($isAdmin ? 'admin_panel.php' : 'dashboard.php'));
-    exit;
+if ($id !== null && isset($_SESSION['ads']) && is_array($_SESSION['ads'])) {
+    foreach ($_SESSION['ads'] as $ad) {
+        if (!empty($ad['id']) && $ad['id'] === $id) {
+            $adTitle = $ad['title'] ?? '';
+            break;
+        }
+    }
 }
 
-// Bis hierher: Erster Aufruf → Bestätigungsseite anzeigen
 include __DIR__ . '/partials/header.php';
 ?>
 
-<h1 class="mb-4">Anzeige löschen</h1>
+<h1 class="h4 mb-4">Anzeige löschen</h1>
 
-<div class="alert alert-warning">
-  Bist du sicher, dass du diese Anzeige löschen möchtest?
-</div>
+<div class="d-flex justify-content-center">
+  <div class="bg-light border rounded p-3" style="max-width: 380px; width: 100%;">
+    <p class="mb-2">Willst du diese Anzeige wirklich löschen?</p>
 
-<div class="card mb-3">
-  <div class="card-body">
-    <h5 class="card-title mb-1">
-      <?php echo htmlspecialchars($ad['title'] ?? 'Anzeige'); ?>
-    </h5>
-    <?php if (!empty($ad['price'])): ?>
-      <p class="fw-bold mb-2"><?php echo htmlspecialchars($ad['price']); ?> €</p>
-    <?php endif; ?>
-    <?php if (!empty($ad['description'])): ?>
-      <p class="card-text small text-muted mb-0">
-        <?php
-        $short = mb_strimwidth($ad['description'], 0, 160, '…');
-        echo nl2br(htmlspecialchars($short));
-        ?>
+    <?php if ($adTitle !== ''): ?>
+      <p class="fw-bold small mb-3">
+        <?php echo htmlspecialchars($adTitle); ?>
       </p>
     <?php endif; ?>
+
+    <form method="post" class="d-flex gap-2">
+      <input type="hidden" name="id" value="<?php echo htmlspecialchars($id ?? ''); ?>">
+
+      <button type="submit" class="btn btn-danger btn-sm">
+        Ja, löschen
+      </button>
+
+      <a href="dashboard.php" class="btn btn-outline-secondary btn-sm">
+        Abbrechen
+      </a>
+    </form>
   </div>
 </div>
 
-<form method="post" class="d-flex gap-2">
-  <input type="hidden" name="id" value="<?php echo htmlspecialchars($id); ?>">
-  <input type="hidden" name="confirm" value="yes">
-
-  <button type="submit" class="btn btn-danger">
-    Ja, Anzeige endgültig löschen
-  </button>
-
-  <a href="<?php echo $isAdmin ? 'admin_panel.php' : 'dashboard.php'; ?>"
-     class="btn btn-outline-secondary">
-    Abbrechen
-  </a>
-</form>
-
 <?php include __DIR__ . '/partials/footer.php'; ?>
-
