@@ -4,9 +4,11 @@
   <div class="col-md-7">
     <!-- Bildbereich (kannst du später mit echtem Upload ersetzen) -->
     <div class="border bg-white rounded p-3 mb-3 mb-md-0">
-      <div class="ratio ratio-4x3 bg-light d-flex align-items-center justify-content-center">
-        <span class="text-muted">Platz für Produktbild</span>
-      </div>
+      <div class="border bg-white rounded p-3 mb-3 mb-md-0">
+        <img src="assets/img/ikea_schreibtisch.png" 
+            alt="IKEA Schreibtisch"
+            class="img-fluid rounded">
+        </div>
     </div>
   </div>
 
