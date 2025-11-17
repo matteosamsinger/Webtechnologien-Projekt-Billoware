@@ -1,7 +1,6 @@
 <?php
 // login.php
 
-// 1. Sessions & Userdaten einbinden, bevor irgendwas ausgegeben wird
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
@@ -10,28 +9,30 @@ require __DIR__ . '/data/users.php';
 
 $error = '';
 
-// 2. Wenn Formular abgeschickt wurde, Login prüfen
+// zusätzlich: registrierte User aus der Session
+$registeredUsers = $_SESSION['registered_users'] ?? [];
+$allUsers = array_merge($users, $registeredUsers);
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $email = trim($_POST['email'] ?? '');
+    $email    = trim($_POST['email'] ?? '');
     $password = $_POST['password'] ?? '';
 
     $foundUser = null;
 
-    foreach ($users as $user) {
-        if ($user['email'] === $email && $user['password'] === $password) {
+    // jetzt über alle bekannten User gehen (Hardcoded + Registrierte)
+    foreach ($allUsers as $user) {
+        if (($user['email'] ?? '') === $email && ($user['password'] ?? '') === $password) {
             $foundUser = $user;
             break;
         }
     }
 
     if ($foundUser) {
-        // 3. User in Session speichern
         $_SESSION['user'] = [
             'email' => $foundUser['email'],
-            'role'  => $foundUser['role'],
+            'role'  => $foundUser['role'] ?? 'user',
         ];
 
-        // 4. Nach erfolgreichem Login weiterleiten
         header('Location: index.php');
         exit;
     } else {
@@ -39,9 +40,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-// 5. Ab hier HTML-Ausgabe mit Header
 include __DIR__ . '/partials/header.php';
 ?>
+
+<!-- ab hier dein Login-HTML wie schon vorher (Formular etc.) -->
+
 
 <h1 class="mb-4">Login</h1>
 
