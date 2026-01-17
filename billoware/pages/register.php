@@ -1,35 +1,29 @@
 <?php
-// register.php
-
-// 1. Session & Userliste laden
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
-
-require __DIR__ . '/data/users.php';
+// Session/Flash + User-Service (DB Create)
+require_once __DIR__ . '/../utils/session.php';
+require_once __DIR__ . '/../services/user_service.php';
 
 $errors = [];
 $success = false;
 
-$name            = '';
-$email           = '';
-$password        = '';
-$passwordRepeat  = '';
 
-// Bereits registrierte (Session-)User laden
-$registeredUsers = $_SESSION['registered_users'] ?? [];
+// Formularfelder (damit beim Fehler die Werte drin bleiben)
+$name = '';
+$email = '';
+$password = '';
+$passwordRepeat = '';
 
-// 2. Formular abgeschickt?
+// Formular abgeschickt?
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $name           = trim($_POST['name'] ?? '');
-    $email          = trim($_POST['email'] ?? '');
-    $password       = $_POST['password'] ?? '';
+
+      // Eingaben lesen
+    $name = trim($_POST['name'] ?? '');
+    $email = trim($_POST['email'] ?? '');
+    $password = $_POST['password'] ?? '';
     $passwordRepeat = $_POST['password_repeat'] ?? '';
 
-    // Einfache Validierung
-    if ($name === '') {
-        $errors[] = 'Bitte gib einen Namen ein.';
-    }
+    // Validierung (Server-side)
+    if ($name === '') $errors[] = 'Bitte gib einen Namen ein.';
 
     if ($email === '') {
         $errors[] = 'Bitte gib eine E-Mail-Adresse ein.';
@@ -49,40 +43,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $errors[] = 'Die Passwörter stimmen nicht überein.';
     }
 
-    // Prüfen, ob E-Mail schon existiert (entweder in data/users.php oder in Session)
-    $allUsers = array_merge($users, $registeredUsers);
-    foreach ($allUsers as $u) {
-        if (($u['email'] ?? '') === $email) {
-            $errors[] = 'Für diese E-Mail-Adresse existiert bereits ein Konto.';
-            break;
-        }
-    }
-
-    // Wenn keine Fehler: neuen User in Session speichern
+    // Wenn valid: prüfen ob Mail bereits existiert + User anlegen
     if (empty($errors)) {
-        $newUser = [
-            'name'     => $name,
-            'email'    => $email,
-            'password' => $password, // später: password_hash(...)
-            'role'     => 'user',
-        ];
+        if (user_find_by_email($email)) {
+            $errors[] = 'Für diese E-Mail-Adresse existiert bereits ein Konto.';
+        } else {
+            user_create($name, $email, $password); // speichert password_hash in DB
+            $success = true;
 
-        $registeredUsers[] = $newUser;
-        $_SESSION['registered_users'] = $registeredUsers;
-
-        $success = true;
-
-        // Felder leeren
-        $name           = '';
-        $email          = '';
-        $password       = '';
-        $passwordRepeat = '';
+            // Felder leeren
+            $name = $email = $password = $passwordRepeat = '';
+        }
     }
 }
 
-// 3. HTML-Ausgabe
-include __DIR__ . '/partials/header.php';
+include __DIR__ . '/../partials/header.php';
 ?>
+
+<!-- Wenn Errors: Alert mit Liste -->
+<!-- Wenn Success: Success-Alert + Link zum Login -->
+<!-- Formular bleibt bei Fehler stehen -->
+
 
 <h1 class="mb-4">Registrieren</h1>
 
@@ -99,7 +80,7 @@ include __DIR__ . '/partials/header.php';
 <?php if ($success): ?>
   <div class="alert alert-success">
     Dein Konto wurde erfolgreich erstellt. Du kannst dich jetzt
-    <a href="login.php" class="alert-link">einloggen</a>.
+    <a href="/billoware/pages/login.php" class="alert-link">einloggen</a>.
   </div>
 <?php endif; ?>
 
@@ -163,9 +144,9 @@ include __DIR__ . '/partials/header.php';
 
     <p class="mt-3 small text-muted">
       Du hast schon ein Konto?
-      <a href="login.php">Zum Login</a>
+      <a href="/billoware/pages/login.php">Zum Login</a>
     </p>
   </div>
 </div>
 
-<?php include __DIR__ . '/partials/footer.php'; ?>
+<?php include __DIR__ . '/../partials/footer.php'; ?>

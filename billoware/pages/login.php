@@ -1,49 +1,38 @@
 <?php
-// login.php
-
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
-
-require __DIR__ . '/data/users.php';
+// Session/Flash + User-Service (DB Login)
+require_once __DIR__ . '/../utils/session.php';
+require_once __DIR__ . '/../services/user_service.php';
 
 $error = '';
+$email = '';
 
-// zusätzlich: registrierte User aus der Session
-$registeredUsers = $_SESSION['registered_users'] ?? [];
-$allUsers = array_merge($users, $registeredUsers);
-
+// Formular abgeschickt?
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $email    = trim($_POST['email'] ?? '');
+
+      // Eingaben lesen
+    $email = trim($_POST['email'] ?? '');
     $password = $_POST['password'] ?? '';
 
-    $foundUser = null;
+    // Login prüfen: user existiert? gesperrt? passwort korrekt?
+    $result = user_verify_login($email, $password);
 
-    // jetzt über alle bekannten User gehen (Hardcoded + Registrierte)
-    foreach ($allUsers as $user) {
-        if (($user['email'] ?? '') === $email && ($user['password'] ?? '') === $password) {
-            $foundUser = $user;
-            break;
-        }
-    }
-
-    if ($foundUser) {
-        $_SESSION['user'] = [
-            'email' => $foundUser['email'],
-            'role'  => $foundUser['role'] ?? 'user',
-        ];
-
-        header('Location: index.php');
+      // OK -> Session-User setzen + Redirect auf Startseite
+    if (!empty($result['ok'])) {
+        login_user($result['user']);
+        header('Location: /billoware/pages/index.php');
         exit;
-    } else {
-        $error = 'E-Mail oder Passwort ist falsch.';
     }
+
+    // Fehlermeldung setzen (für Alert)
+    $error = $result['error'] ?? 'E-Mail oder Passwort ist falsch.';
+
 }
 
-include __DIR__ . '/partials/header.php';
+include __DIR__ . '/../partials/header.php';
 ?>
 
-<!-- ab hier dein Login-HTML wie schon vorher (Formular etc.) -->
+<!-- Login-Formular (POST auf gleiche Seite) -->
+<!-- Wenn $error gesetzt ist, wird ein Bootstrap Alert angezeigt -->
 
 
 <h1 class="mb-4">Login</h1>
@@ -90,11 +79,11 @@ include __DIR__ . '/partials/header.php';
     </div>
 
     <p class="mt-3 small text-muted">
-      Test-User: <br>
+      <!--Test-User: <br>
       user@billoware.at / user123 <br>
-      admin@billoware.at / admin123
+      admin@billoware.at / admin123-->
     </p>
   </div>
 </div>
 
-<?php include __DIR__ . '/partials/footer.php'; ?>
+<?php include __DIR__ . '/../partials/footer.php'; ?>

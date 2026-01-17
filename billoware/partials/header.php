@@ -1,11 +1,15 @@
 <?php
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
+// Session starten + Flash-Funktionen verfügbar machen
+require_once __DIR__ . '/../utils/session.php';
 
+// Login-Status für Navbar
 $isLoggedIn = isset($_SESSION['user']);
 $isAdmin   = $isLoggedIn && (($_SESSION['user']['role'] ?? '') === 'admin');
+
+// Flash einmalig holen (und dabei aus Session entfernen)
+$flash = flash_get();
 ?>
+
 <!doctype html>
 <html lang="de">
 <head>
@@ -19,38 +23,38 @@ $isAdmin   = $isLoggedIn && (($_SESSION['user']['role'] ?? '') === 'admin');
         rel="stylesheet">
 
     <!-- eigenes CSS -->
-    <link rel="stylesheet" href="assets/css/styles.css">
+    <link rel="stylesheet" href="/billoware/assets/css/styles.css">
 </head>
 <body>
 
 <!-- einfache Navbar ohne Burger, ohne JS -->
 <nav class="navbar navbar-dark bg-dark">
   <div class="container">
-    <a class="navbar-brand" href="index.php">Billoware</a>
+    <a class="navbar-brand" href="/billoware/pages/index.php">Billoware</a>
 
     <ul class="nav">
       <li class="nav-item">
-        <a class="nav-link text-white" href="index.php">Startseite</a>
+        <a class="nav-link text-white" href="/billoware/pages/index.php">Startseite</a>
       </li>
 
       <?php if ($isLoggedIn): ?>
         <li class="nav-item">
-          <a class="nav-link text-white" href="dashboard.php">Dashboard</a>
+          <a class="nav-link text-white" href="/billoware/pages/dashboard.php">Dashboard</a>
         </li>
         <?php if ($isAdmin): ?>
           <li class="nav-item">
-            <a class="nav-link text-white" href="admin_panel.php">Admin</a>
+            <a class="nav-link text-white" href="/billoware/pages/admin_panel.php">Admin</a>
           </li>
         <?php endif; ?>
         <li class="nav-item">
-          <a class="nav-link text-white" href="logout.php">Logout</a>
+          <a class="nav-link text-white" href="/billoware/pages/logout.php">Logout</a>
         </li>
       <?php else: ?>
         <li class="nav-item">
-          <a class="nav-link text-white" href="login.php">Login</a>
+          <a class="nav-link text-white" href="/billoware/pages/login.php">Login</a>
         </li>
         <li class="nav-item">
-          <a class="nav-link text-white" href="register.php">Registrieren</a>
+          <a class="nav-link text-white" href="/billoware/pages/register.php">Registrieren</a>
         </li>
       <?php endif; ?>
     </ul>
@@ -58,3 +62,9 @@ $isAdmin   = $isLoggedIn && (($_SESSION['user']['role'] ?? '') === 'admin');
 </nav>
 
 <main class="container py-4">
+
+<?php if ($flash): ?>
+  <div class="alert alert-<?php echo htmlspecialchars($flash['type']); ?>">
+    <?php echo htmlspecialchars($flash['message']); ?>
+  </div>
+<?php endif; ?>
