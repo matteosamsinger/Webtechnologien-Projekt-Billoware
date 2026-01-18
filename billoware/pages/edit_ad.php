@@ -50,7 +50,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($title === '') $errors[] = 'Bitte gib einen Titel ein.';
     if ($description === '') $errors[] = 'Bitte gib eine Beschreibung ein.';
     if ($contactEmail === '' || !filter_var($contactEmail, FILTER_VALIDATE_EMAIL)) $errors[] = 'Bitte gib eine gültige Kontakt-E-Mail an.';
-    if ($price === '' || !is_numeric($price)) $errors[] = 'Preis muss eine Zahl sein.';
+    if ($price !== '') {
+      if (!is_numeric($price)) {
+          $errors[] = 'Preis muss eine Zahl sein.';
+        } elseif ((float)$price < 0) {
+            $errors[] = 'Der Preis darf nicht negativ sein.';
+        } else {
+            $price = number_format((float)$price, 2, '.', '');
+        }
+      }
 
 
     // Upload: nur so viele Bilder wie noch frei sind (max 3 gesamt)
@@ -130,7 +138,7 @@ include __DIR__ . '/../partials/header.php';
 
           <div class="mb-3">
             <label class="form-label">Preis</label>
-            <input type="number" step="0.01" class="form-control" name="price" value="<?php echo htmlspecialchars($price); ?>">
+            <input type="number" step="0.01" min="0" class="form-control" name="price" value="<?php echo htmlspecialchars($price); ?>">
           </div>
 
           <div class="row">

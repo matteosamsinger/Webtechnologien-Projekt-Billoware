@@ -67,13 +67,21 @@ function ad_list_by_user(int $userId): array
 }
 
 // READ: neueste Anzeigen (Startseite + optional Suche via LIKE)
+// damit kein SQL-Injection/kaputtes SQL möglich ist.
 function ad_list_latest(?string $q = null, int $limit = 30): array
 {
+    // Sicherheits-Clamp: nur sinnvolle Grenzen zulassen
+    $limit = (int)$limit;
+    if ($limit < 1)   $limit = 1;
+    if ($limit > 200) $limit = 200;
+
     if ($q !== null && $q !== '') {
         $like = '%' . $q . '%';
+
         $stmt = db()->prepare("
             SELECT a.*, u.email AS owner_email
-            FROM ads a JOIN users u ON u.id=a.user_id
+            FROM ads a
+            JOIN users u ON u.id = a.user_id
             WHERE a.title LIKE ? OR a.description LIKE ?
             ORDER BY a.created_at DESC
             LIMIT $limit
@@ -84,7 +92,8 @@ function ad_list_latest(?string $q = null, int $limit = 30): array
 
     $stmt = db()->query("
         SELECT a.*, u.email AS owner_email
-        FROM ads a JOIN users u ON u.id=a.user_id
+        FROM ads a
+        JOIN users u ON u.id = a.user_id
         ORDER BY a.created_at DESC
         LIMIT $limit
     ");
